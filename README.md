@@ -38,7 +38,7 @@ Send a quiet note:
 /intercom <to> <message>
 ```
 
-Send an aside that wakes an idle receiver:
+Send an aside that reaches a busy receiver at its next step:
 
 ```text
 /intercom <to> --aside <message>
@@ -63,11 +63,11 @@ The extension registers the `intercom` tool with these arguments:
 }
 ```
 
-`delivery` is optional and defaults to `quiet`; use `aside` to wake an idle receiver. Agents should send only when the user asks. Use `agent://` for subagents in the same session tree.
+`delivery` is optional and defaults to `quiet`; use `aside` when a busy receiver should see the note before its current turn ends. Both wake an idle receiver. Agents should send only when the user asks. Use `agent://` for subagents in the same session tree.
 
 ## Delivery and lifecycle
 
-- **Quiet:** appends an agent-attributed custom message with `deliverAs: "nextTurn"`. It does not interrupt a running turn or start a turn in an idle receiver.
+- **Quiet:** appends an agent-attributed custom message with `deliverAs: "nextTurn", triggerTurn: true`. It never interrupts a running turn; the receiver starts a new turn for it once the current turn ends, or immediately if idle.
 - **Aside:** sends an agent-attributed user-style message with `deliverAs: "aside"`. It arrives at the next step boundary and starts a turn if the receiver is idle.
 - Received notes identify their sender and explicitly distinguish peer-agent text from the user's instructions.
 - Only top-level sessions own listeners. Session switches and branches update the card while retaining the listener; completed turns refresh its title.
@@ -79,4 +79,4 @@ This is local IPC for processes running as the same OS user, not a network servi
 
 ## Verification
 
-The extracted package and the installed extension symlink were loaded in two real headless omp processes. The smoke run exercised quiet delivery without starting a turn, aside delivery that woke the receiver, delivery after `/new`, file permissions, and clean shutdown. The aside-triggered turn was aborted after the wake event.
+The extracted package and the installed extension symlink were loaded in two real headless omp processes. The smoke run exercised quiet delivery, aside delivery that woke the receiver, delivery after `/new`, file permissions, and clean shutdown. The aside-triggered turn was aborted after the wake event.

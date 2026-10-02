@@ -4,10 +4,10 @@
 //
 // Each top-level session listens on a Unix socket in ~/.omp/agent/intercom
 // (owner-only) beside a small JSON card naming it. A "quiet" message (the
-// default) is handed over with `sendMessage` as "nextTurn": it never cuts
-// into a running turn, and an idle session takes it into context without
-// starting one. (`sendUserMessage` would prompt an idle session even as
-// "nextTurn".) An "aside" is a user-style message from an agent that
+// default) is handed over with `sendMessage` as "nextTurn" with
+// `triggerTurn`: it never cuts into a running turn, a busy session takes it
+// up in a fresh turn once the current one ends, and an idle session starts
+// that turn at once. An "aside" is a user-style message from an agent that
 // arrives at the receiver's next step boundary and wakes it when idle.
 //
 // Send with the `intercom` tool (agents) or `/intercom` (people).
@@ -134,13 +134,13 @@ function receive(station: Station, envelope: Envelope): string {
   } else {
     station.api.sendMessage(
       { customType: "intercom", content: `${head}\n\n${text}`, display: true, attribution: "agent" },
-      { deliverAs: "nextTurn" },
+      { deliverAs: "nextTurn", triggerTurn: true },
     );
   }
   const deliverAs = envelope.delivery === "aside" ? "aside" : "nextTurn";
   try {
     station.ctx.ui.notify(
-      `Intercom from ${from.title ?? path.basename(from.cwd)} (${from.id}): ${deliverAs === "aside" ? "arriving at the next step" : "held for the next turn"}`,
+      `Intercom from ${from.title ?? path.basename(from.cwd)} (${from.id}): ${deliverAs === "aside" ? "arriving at the next step" : "starting a turn when idle"}`,
       "info",
     );
   } catch {
@@ -290,8 +290,8 @@ export default function intercom(pi: ExtensionAPI) {
     description:
       "Message another top-level omp session running on this machine (a separate process, such as another terminal pane). " +
       "Not for subagents: use write agent://<id> for those. action 'list' shows who is listening; 'send' delivers `message` " +
-      "to `to` (a session id, its project folder name or path, or part of its title). delivery 'quiet' (default) holds the " +
-      "message for the receiver's next turn without interrupting it; 'aside' reaches it at its next step and wakes it if idle. " +
+      "to `to` (a session id, its project folder name or path, or part of its title). delivery 'quiet' (default) never " +
+      "interrupts: the receiver handles it once its current turn ends, or at once if idle; 'aside' reaches it at its next step. " +
       "Only send when the user asked for it.",
     parameters: z.object({
       action: z.enum(["list", "send"]),
