@@ -1,0 +1,10 @@
+{
+  "name": "omp-intercom",
+  "version": "0.1.0",
+  "description": "Local messaging between independent top-level omp sessions",
+  "type": "module",
+  "files": ["intercom.ts"],
+  "omp": {
+    "extensions": ["./intercom.ts"]
+  }
+}
