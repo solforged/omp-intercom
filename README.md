@@ -67,8 +67,10 @@ The extension registers the `intercom` tool with these arguments:
 
 ## Delivery and lifecycle
 
-- **Quiet:** appends an agent-attributed custom message with `deliverAs: "nextTurn", triggerTurn: true`. It never interrupts a running turn; the receiver starts a new turn for it once the current turn ends, or immediately if idle.
-- **Aside:** sends an agent-attributed user-style message with `deliverAs: "aside"`. It arrives at the next step boundary and starts a turn if the receiver is idle.
+Both modes deliver the same agent-attributed `intercom` custom message, so a note always renders as an intercom card rather than as text you typed.
+
+- **Quiet:** delivered with `deliverAs: "nextTurn", triggerTurn: true`. It never interrupts a running turn; the receiver starts a new turn for it once the current turn ends, or immediately if idle.
+- **Aside:** delivered with `deliverAs: "aside"`, the path omp's own `agent://` asides take. It arrives at the next step boundary and starts a turn if the receiver is idle. In plan mode, or after an Esc interrupt, it joins the context without starting a turn.
 - Received notes identify their sender and explicitly distinguish peer-agent text from the user's instructions.
 - Only top-level sessions own listeners. Session switches and branches update the card while retaining the listener; completed turns refresh its title.
 - A delivery acknowledgement means omp accepted the message, not that the receiving agent acted on it.
